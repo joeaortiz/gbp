@@ -1,7 +1,7 @@
 import numpy as np
 import json
 import yaml
-from geometry import lie_algebra, transformations
+from utils import lie_algebra, transformations
 
 
 """
