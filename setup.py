@@ -18,8 +18,10 @@ setup(
     version=version,
     packages=find_packages(),
     install_requires=[
-        'trimesh'
-    ],  # see requirements.txt
+        'scipy',
+        'trimesh',
+        'pyglet'
+    ],  
     author='Joseph Ortiz',
     author_email='joeaortiz16@gmail.com',
 )
