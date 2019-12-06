@@ -2,7 +2,7 @@ import numpy as np
 import trimesh
 import trimesh.viewer
 import pyglet
-from geometry import lie_algebra
+from utils import lie_algebra
 
 
 def view(cam_params, landmarks, K, fov=[640, 480]):
