@@ -18,6 +18,7 @@ setup(
     version=version,
     packages=find_packages(),
     install_requires=[
+        'numpy',
         'scipy',
         'trimesh',
         'pyglet',
