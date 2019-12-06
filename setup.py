@@ -20,7 +20,9 @@ setup(
     install_requires=[
         'scipy',
         'trimesh',
-        'pyglet'
+        'pyglet',
+        'rtree',
+        'shapely'
     ],
     author='Joseph Ortiz',
     author_email='joeaortiz16@gmail.com',
