@@ -1,6 +1,12 @@
 import numpy as np
-from gbp import gbp, reprojection
+from gbp import gbp
+from gbp.factors import reprojection
 from data_handling import read_balfile
+
+"""
+    Defines child classes of GBP parent classes for Bundle Adjustment.
+    Also defines the function to create the factor graph. 
+"""
 
 
 class BAFactorGraph(gbp.FactorGraph):
@@ -55,22 +61,11 @@ class BAFactorGraph(gbp.FactorGraph):
         """
             Computes the Average Reprojection Error across the whole graph.
         """
-        residuals = self.compute_residuals()
-        tot_are = 0
-        for residual in np.reshape(residuals, [-1, 2]):
-            tot_are += np.linalg.norm(residual)
-        are = 2 * tot_are / len(residuals)
-        return are
-
-    def reprojection_energy(self):
-        """
-            Computes the squared error of the reprojection terms using the appropriate loss function.
-        """
-        energy = 0
+        are = 0
         for factor in self.factors:
             if isinstance(factor, ReprojectionFactor):
-                energy += 0.5 * np.linalg.norm(factor.compute_residual())**2 / factor.adaptive_gauss_noise_var
-        return energy
+                are += np.linalg.norm(factor.compute_residual())
+        return are / len(self.factors)
 
 
 class LandmarkVariableNode(gbp.VariableNode):
@@ -91,15 +86,11 @@ class ReprojectionFactor(gbp.Factor):
         gbp.Factor.__init__(self, factor_id, adj_var_nodes, measurement, gauss_noise_std,
                             reprojection.meas_fn, reprojection.jac_fn, loss, Nstds, K)
 
-    def compute_residual(self):
+    def reprojection_err(self):
         """
-            Calculate the reprojection error vector.
+            Returns the reprojection error at the factor in pixels.
         """
-        adj_belief_means = []
-        for belief in self.adj_beliefs:
-            adj_belief_means = np.concatenate((adj_belief_means, np.linalg.inv(belief.lam) @ belief.eta))
-        d = self.meas_fn(adj_belief_means, *self.args) - self.measurement
-        return d
+        return np.linalg.norm(self.compute_residual())
 
 
 def create_ba_graph(bal_file, configs):
@@ -110,9 +101,9 @@ def create_ba_graph(bal_file, configs):
             measurements_lIDs, K = read_balfile.read_balfile(bal_file)
 
     graph = BAFactorGraph(eta_damping=configs['eta_damping'],
-                                 beta=configs['beta'],
-                                 num_undamped_iters=configs['num_undamped_iters'],
-                                 min_linear_iters=configs['min_linear_iters'])
+                         beta=configs['beta'],
+                         num_undamped_iters=configs['num_undamped_iters'],
+                         min_linear_iters=configs['min_linear_iters'])
 
     variable_id = 0
     factor_id = 0

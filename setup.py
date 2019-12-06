@@ -17,7 +17,9 @@ setup(
     name='gbp',
     version=version,
     packages=find_packages(),
-    install_requires=[],  # see requirements.txt
+    install_requires=[
+        'trimesh'
+    ],  # see requirements.txt
     author='Joseph Ortiz',
     author_email='joeaortiz16@gmail.com',
 )

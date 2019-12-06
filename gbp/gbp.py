@@ -41,6 +41,15 @@ class FactorGraph:
             self.num_undamped_iters = num_undamped_iters  # Number of undamped iterations after relinearisation before damping is set to 0.4
             self.min_linear_iters = min_linear_iters  # Minimum number of linear iterations before a factor is allowed to realinearise.
 
+    def energy(self):
+        """
+            Computes the sum of all of the squared errors in the graph using the appropriate local loss function.
+        """
+        energy = 0
+        for factor in self.factors:
+            energy += 0.5 * np.linalg.norm(factor.compute_residual()) ** 2 / factor.adaptive_gauss_noise_var
+        return energy
+
     def compute_all_messages(self, local_relin=True):
         for factor in self.factors:
             # If relinearisation is local then damping is also set locally per factor.
@@ -174,6 +183,22 @@ class Factor:
         self.eta_damping = 0.
         self.iters_since_relin = 1
 
+    def compute_residual(self):
+        """
+            Calculate the reprojection error vector.
+        """
+        adj_belief_means = []
+        for belief in self.adj_beliefs:
+            adj_belief_means = np.concatenate((adj_belief_means, np.linalg.inv(belief.lam) @ belief.eta))
+        d = self.meas_fn(adj_belief_means, *self.args) - self.measurement
+        return d
+
+    def energy(self):
+        """
+            Computes the squared error using the appropriate loss function.
+        """
+        return 0.5 * np.linalg.norm(self.compute_residual()) ** 2 / self.adaptive_gauss_noise_var
+
     def compute_factor(self, linpoint=None, update_self=True):
         """
             Compute the factor given the linearisation point.
@@ -183,7 +208,7 @@ class Factor:
         if linpoint is None:
             self.linpoint = []
             for belief in self.adj_beliefs:
-                self.linpoint += np.linalg.inv(belief.lam) @ belief.eta
+                self.linpoint += list(np.linalg.inv(belief.lam) @ belief.eta)
         else:
             self.linpoint = linpoint
 

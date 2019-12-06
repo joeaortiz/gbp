@@ -2,7 +2,7 @@
 
 ## Setup
 
-
+In `gbp` directory, execute `pip install -e .`
 
 ## 2D Simulations
 

@@ -7,7 +7,6 @@ parser.add_argument("--file", help="BAL style file with BA data")
 args = parser.parse_args()
 
 file = args.file
-print(file)
 file = 'data/fr1desk.txt'
 
 configs = dict({
@@ -49,7 +48,7 @@ for i in range(200):
             factor.iters_since_relin = 1
 
     are = graph.are()
-    energy = graph.reprojection_energy()
+    energy = graph.energy()
     n_factor_relins = 0
     for factor in graph.factors:
         if factor.iters_since_relin == 0:
