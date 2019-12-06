@@ -1,5 +1,5 @@
 import numpy as np
-from geometry import lie_algebra
+from utils import lie_algebra
 
 _EPS = np.finfo(float).eps
 

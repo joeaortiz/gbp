@@ -20,11 +20,11 @@ def view(cam_params, landmarks, K, fov=[640, 480]):
 		cam_name = f'cam_{i}'
 		cam = trimesh.scene.Camera(fov=angle_fov_deg)
 		geom = trimesh.creation.camera_marker(cam, marker_height=0.1)
-		geom[1].colors = [(0., 0., 1.)] * 16
+		# geom[1].colors = [(0., 0., 1.)] * 16
 		scene.add_geometry(geom[1], transform=Twc, node_name=cam_name)
 
 	landmarks_pcd = trimesh.PointCloud(landmarks)
-	landmarks_pcd.colors = [[0.9, 0., 0.]] * len(landmarks)
+	landmarks_pcd.colors = [[0., 0., 0.9]] * len(landmarks)
 	scene.add_geometry(landmarks_pcd, node_name='landmarks_pcd')
 
 	scene.set_camera()
