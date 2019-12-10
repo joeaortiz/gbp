@@ -2,7 +2,18 @@
 
 ## Setup
 
-In `gbp` directory, execute `pip install -e .`
+Install dependencies for gbp library:
+
+- numpy, scipy
+
+Install dependencies for bundle adjustment visualization:
+
+- rtree (`conda install rtree`), trimesh (`pip install 'trimesh[easy]=2.38.38'`)
+
+Then install gbp module:
+
+pip install -e .
+
 
 ## 2D Simulations
 
