@@ -1,5 +1,4 @@
-data_handling/gen_data.py
-data_handling/parse_orbslam_res.py
+data_handling/
 __pycache__/
 .pyc
 ndbp.py
