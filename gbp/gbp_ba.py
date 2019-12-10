@@ -1,7 +1,7 @@
 import numpy as np
 from gbp import gbp
 from gbp.factors import reprojection
-from data_handling import read_balfile
+from utils import read_balfile
 
 """
     Defines child classes of GBP parent classes for Bundle Adjustment.
