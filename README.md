@@ -8,7 +8,7 @@ Install dependencies for gbp library:
 
 Install dependencies for bundle adjustment visualization:
 
-- rtree (`conda install rtree`), trimesh (`pip install 'trimesh[easy]=2.38.38'`)
+- rtree (`conda install rtree`), networkx, shapely, pyglet, trimesh (`pip install 'trimesh=2.38.38'`)
 
 Then install gbp module:
 
