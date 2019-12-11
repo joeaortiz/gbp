@@ -10,7 +10,7 @@ Install dependencies for bundle adjustment visualization:
 
 - rtree (`conda install rtree`), shapely (`conda install shapely`), trimesh (`pip install trimesh[easy]`)
 
-Then in `gbp` directory install gbp module:
+Then install gbp module:
 
 pip install -e .
 
