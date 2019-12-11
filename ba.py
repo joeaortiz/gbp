@@ -1,3 +1,7 @@
+"""
+Bundle Adjustment using GBP.
+"""
+
 import argparse
 from gbp import gbp_ba
 import vis

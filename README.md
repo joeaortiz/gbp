@@ -10,17 +10,17 @@ Install dependencies for bundle adjustment visualization:
 
 - rtree (`conda install rtree`), shapely (`conda install shapely`), trimesh (`pip install trimesh[easy]`)
 
-Then install gbp module:
+Then, in the project directory, install the gbp module:
 
-pip install -e .
+`pip install -e .`
 
 
-## 2D Simulations
+## Toy simulations
 
-2D simulation with linear factors between randomly placed variables. 
+Estimation locations of variables in N-dim space, where nearby variables are connected by linear factors. 
 
 ```
-python 2d_linear.py
+python ndim_posegraph.py
 ```
 
 ## Bundle Adjustment

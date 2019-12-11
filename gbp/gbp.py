@@ -1,4 +1,5 @@
 import numpy as np
+import scipy.linalg
 
 """
     Defines classes for variable nodes, factor nodes and edges. 
@@ -97,6 +98,64 @@ class FactorGraph:
             self.relinearise_factors()
         self.compute_all_messages(local_relin=local_relin)
         self.update_all_beliefs()
+
+    def joint_distribution_inf(self):
+        """
+            Get the joint distribution over all variables in the information form at the current linearisation point.
+        """
+
+        eta = np.array([])
+        lam = np.array([])
+        var_node_ix = np.zeros(len(self.var_nodes)).astype(int)
+        tot_n_vars = 0
+        for var_node in self.var_nodes:
+            var_node_ix[var_node.variableID] = int(tot_n_vars)
+            tot_n_vars += var_node.dofs
+            eta = np.concatenate((eta, var_node.prior.eta))
+            if var_node.variableID == 0:
+                lam = var_node.prior.lam
+            else:
+                lam = scipy.linalg.block_diag(lam, var_node.prior.lam)
+
+        for factor in self.factors:
+            factor_ix = 0
+            for adj_var_node in factor.adj_var_nodes:
+                vID = adj_var_node.variableID
+                # Diagonal contribution of factor
+                eta[var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs] += factor.factor.eta[factor_ix:factor_ix + adj_var_node.dofs]
+                lam[var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs, var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs] += \
+                    factor.factor.lam[factor_ix:factor_ix + adj_var_node.dofs, factor_ix:factor_ix + adj_var_node.dofs]
+                other_factor_ix = 0
+                for other_adj_var_node in factor.adj_var_nodes:
+                    if other_adj_var_node.variableID > adj_var_node.variableID:
+                        other_vID = other_adj_var_node.variableID
+                        # Off diagonal contributions of factor
+                        lam[var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs, var_node_ix[other_vID]:var_node_ix[other_vID] + other_adj_var_node.dofs] += \
+                            factor.factor.lam[factor_ix:factor_ix + adj_var_node.dofs, other_factor_ix:other_factor_ix + other_adj_var_node.dofs]
+                        lam[var_node_ix[other_vID]:var_node_ix[other_vID] + other_adj_var_node.dofs, var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs] += \
+                            factor.factor.lam[other_factor_ix:other_factor_ix + other_adj_var_node.dofs, factor_ix:factor_ix + adj_var_node.dofs]
+                    other_factor_ix += other_adj_var_node.dofs
+                factor_ix += adj_var_node.dofs
+
+        return eta, lam
+
+    def joint_distribution_cov(self):
+        """
+            Get the joint distribution over all variables in the covariance form at the current linearisation point.
+        """
+        eta, lam = self.joint_distribution_inf()
+        sigma = np.linalg.inv(lam)
+        mu = sigma @ eta
+        return mu, sigma
+
+    def get_means(self):
+        """
+            Get an array containing all current estimates of belief means.
+        """
+        mus = np.array([])
+        for var_node in self.var_nodes:
+            mus = np.concatenate((mus, var_node.mu))
+        return mus
 
 
 class VariableNode:
@@ -215,7 +274,7 @@ class Factor:
         J = self.jac_fn(self.linpoint, *self.args)
         pred_measurement = self.meas_fn(self.linpoint, *self.args)
 
-        meas_model_lambda = np.eye(2) / self.adaptive_gauss_noise_var
+        meas_model_lambda = np.eye(len(self.measurement)) / self.adaptive_gauss_noise_var
         lambda_factor = J.T @ meas_model_lambda @ J
         eta_factor = (J.T @ meas_model_lambda) @ (J @ self.linpoint + self.measurement - pred_measurement)
 
@@ -266,10 +325,10 @@ class Factor:
         """
             Compute all outgoing messages from the factor.
         """
-        eta_factor, lam_factor = self.factor.eta.copy(), self.factor.lam.copy()
-
+        messages_eta, messages_lam = [], []
         start_dim = 0
         for v in range(len(self.adj_vIDs)):
+            eta_factor, lam_factor = self.factor.eta.copy(), self.factor.lam.copy()
 
             # Take product of factor with incoming messages
             mess_start_dim = 0
@@ -279,6 +338,7 @@ class Factor:
                     eta_factor[mess_start_dim:mess_start_dim + var_dofs] += self.adj_beliefs[var].eta - self.messages[var].eta
                     lam_factor[mess_start_dim:mess_start_dim + var_dofs, mess_start_dim:mess_start_dim + var_dofs] += self.adj_beliefs[var].lam - self.messages[var].lam
                 mess_start_dim += self.adj_var_nodes[var].dofs
+
 
             # Divide up parameters of distribution
             mess_dofs = self.adj_var_nodes[v].dofs
@@ -294,8 +354,11 @@ class Factor:
                               [lam_factor[start_dim + mess_dofs:, :start_dim], lam_factor[start_dim + mess_dofs:, start_dim + mess_dofs:]]])
 
             # Compute outgoing messages
-            self.messages[v].lam = loo - lono @ np.linalg.inv(lnono) @ lnoo
+            messages_lam.append(loo - lono @ np.linalg.inv(lnono) @ lnoo)
             new_message_eta = eo - lono @ np.linalg.inv(lnono) @ eno
-            self.messages[v].eta = (1 - eta_damping) * new_message_eta + eta_damping * self.messages[v].eta
-
+            messages_eta.append ((1 - eta_damping) * new_message_eta + eta_damping * self.messages[v].eta)
             start_dim += self.adj_var_nodes[v].dofs
+
+        for v in range(len(self.adj_vIDs)):
+            self.messages[v].lam = messages_lam[v]
+            self.messages[v].eta = messages_eta[v]
