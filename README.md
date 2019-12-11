@@ -8,9 +8,9 @@ Install dependencies for gbp library:
 
 Install dependencies for bundle adjustment visualization:
 
-- rtree (`conda install rtree`), networkx, shapely, pyglet, trimesh (`pip install 'trimesh=2.38.38'`)
+- rtree (`conda install rtree`), shapely (`conda install shapely`), trimesh (`pip install trimesh[easy]`)
 
-Then install gbp module:
+Then in `gbp` directory install gbp module:
 
 pip install -e .
 
@@ -22,9 +22,6 @@ pip install -e .
 ```
 python 2d_linear.py
 ```
-
-2D robot simulation. 
-
 
 ## Bundle Adjustment
 
