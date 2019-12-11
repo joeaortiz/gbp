@@ -13,4 +13,4 @@ landmark_initialisation_location
 ...
 ```
 
-,where the camera pose is parametrised by 6 parameters. The first 3 parameters in python notation are Tcw[:3, 3] where Tcw is the world to camera frame transform. The latter 3 parameters are the axis-angle representation of the rotation matrix T[:3, :3].
+The camera pose is parametrised by 6 parameters. The first 3 parameters in python notation are Tcw[:3, 3] where Tcw is the world to camera frame transform. The latter 3 parameters are the axis-angle representation of the rotation matrix T[:3, :3].

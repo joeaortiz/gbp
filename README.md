@@ -17,7 +17,7 @@ Then, in the project directory, install the gbp module:
 
 ## Toy simulations
 
-Estimation locations of variables in N-dim space, where nearby variables are connected by linear factors. 
+Estimation of node locations in N-dim space, where nearby nodes are connected by linear factors. 
 
 ```
 python ndim_posegraph.py
