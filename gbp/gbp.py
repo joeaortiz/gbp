@@ -1,29 +1,21 @@
 import numpy as np
 import scipy.linalg
 
+from utils.gaussian import NdimGaussian
+
 """
     Defines classes for variable nodes, factor nodes and edges. 
     Then defines function for single iteration of GBP. 
 """
 
 
-class NdimGaussian:
-    def __init__(self, dimensionality, eta=None, lam=None):
-        self.dim = dimensionality
-
-        if eta is not None and len(eta) == self.dim:
-            self.eta = eta
-        else:
-            self.eta = np.zeros(self.dim)
-
-        if lam is not None and lam.shape == (self.dim, self.dim):
-            self.lam = lam
-        else:
-            self.lam = np.zeros([self.dim, self.dim])
-
-
 class FactorGraph:
-    def __init__(self, nonlinear_factors=True, eta_damping=0.0, beta=None, num_undamped_iters=None, min_linear_iters=None):
+    def __init__(self,
+                 nonlinear_factors=True,
+                 eta_damping=0.0,
+                 beta=None,
+                 num_undamped_iters=None,
+                 min_linear_iters=None):
 
         self.var_nodes = []
         self.factors = []
@@ -48,6 +40,7 @@ class FactorGraph:
         """
         energy = 0
         for factor in self.factors:
+            # Variance of Gaussian noise at each factor is weighting of each term in squared loss.
             energy += 0.5 * np.linalg.norm(factor.compute_residual()) ** 2 / factor.adaptive_gauss_noise_var
         return energy
 
@@ -101,15 +94,16 @@ class FactorGraph:
 
     def joint_distribution_inf(self):
         """
-            Get the joint distribution over all variables in the information form at the current linearisation point.
+            Get the joint distribution over all variables in the information form
+            If nonlinear factors, it is taken at the current linearisation point.
         """
 
         eta = np.array([])
         lam = np.array([])
-        var_node_ix = np.zeros(len(self.var_nodes)).astype(int)
+        var_ix = np.zeros(len(self.var_nodes)).astype(int)
         tot_n_vars = 0
         for var_node in self.var_nodes:
-            var_node_ix[var_node.variableID] = int(tot_n_vars)
+            var_ix[var_node.variableID] = int(tot_n_vars)
             tot_n_vars += var_node.dofs
             eta = np.concatenate((eta, var_node.prior.eta))
             if var_node.variableID == 0:
@@ -122,17 +116,18 @@ class FactorGraph:
             for adj_var_node in factor.adj_var_nodes:
                 vID = adj_var_node.variableID
                 # Diagonal contribution of factor
-                eta[var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs] += factor.factor.eta[factor_ix:factor_ix + adj_var_node.dofs]
-                lam[var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs, var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs] += \
+                eta[var_ix[vID]:var_ix[vID] + adj_var_node.dofs] += \
+                    factor.factor.eta[factor_ix:factor_ix + adj_var_node.dofs]
+                lam[var_ix[vID]:var_ix[vID] + adj_var_node.dofs, var_ix[vID]:var_ix[vID] + adj_var_node.dofs] += \
                     factor.factor.lam[factor_ix:factor_ix + adj_var_node.dofs, factor_ix:factor_ix + adj_var_node.dofs]
                 other_factor_ix = 0
                 for other_adj_var_node in factor.adj_var_nodes:
                     if other_adj_var_node.variableID > adj_var_node.variableID:
                         other_vID = other_adj_var_node.variableID
                         # Off diagonal contributions of factor
-                        lam[var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs, var_node_ix[other_vID]:var_node_ix[other_vID] + other_adj_var_node.dofs] += \
+                        lam[var_ix[vID]:var_ix[vID] + adj_var_node.dofs, var_ix[other_vID]:var_ix[other_vID] + other_adj_var_node.dofs] += \
                             factor.factor.lam[factor_ix:factor_ix + adj_var_node.dofs, other_factor_ix:other_factor_ix + other_adj_var_node.dofs]
-                        lam[var_node_ix[other_vID]:var_node_ix[other_vID] + other_adj_var_node.dofs, var_node_ix[vID]:var_node_ix[vID] + adj_var_node.dofs] += \
+                        lam[var_ix[other_vID]:var_ix[other_vID] + other_adj_var_node.dofs, var_ix[vID]:var_ix[vID] + adj_var_node.dofs] += \
                             factor.factor.lam[other_factor_ix:other_factor_ix + other_adj_var_node.dofs, factor_ix:factor_ix + adj_var_node.dofs]
                     other_factor_ix += other_adj_var_node.dofs
                 factor_ix += adj_var_node.dofs
@@ -141,7 +136,8 @@ class FactorGraph:
 
     def joint_distribution_cov(self):
         """
-            Get the joint distribution over all variables in the covariance form at the current linearisation point.
+            Get the joint distribution over all variables in the covariance.
+            If nonlinear factors, it is taken at the current linearisation point.
         """
         eta, lam = self.joint_distribution_inf()
         sigma = np.linalg.inv(lam)
@@ -159,7 +155,10 @@ class FactorGraph:
 
 
 class VariableNode:
-    def __init__(self, variable_id, dofs):
+    def __init__(self,
+                 variable_id,
+                 dofs):
+
         self.variableID = variable_id
         self.adj_factors = []
 
@@ -201,8 +200,16 @@ class VariableNode:
 
 
 class Factor:
-    def __init__(self, factor_id, adj_var_nodes, measurement, gauss_noise_std, meas_fn, jac_fn, loss=None,
-                 mahalanobis_threshold=2, *args):
+    def __init__(self,
+                 factor_id,
+                 adj_var_nodes,
+                 measurement,
+                 gauss_noise_std,
+                 meas_fn,
+                 jac_fn,
+                 loss=None,
+                 mahalanobis_threshold=2,
+                 *args):
         """
             n_stds: number of standard deviations from mean at which loss transitions to robust loss function.
         """

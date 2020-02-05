@@ -17,7 +17,7 @@ Then, in the project directory, install the gbp module:
 
 ## Toy simulations
 
-Estimation of node locations in N-dim space, where nearby nodes are connected by linear factors. 
+Estimation of node locations in N-dim space, where nearby nodes are connected by linear factors. Use `python ndim_posegraph.py -h` for information about optional arguments. 
 
 ```
 python ndim_posegraph.py
@@ -26,11 +26,13 @@ python ndim_posegraph.py
 ## Bundle Adjustment
 
 ```
-python ba.py --file data/fr1desk.txt
+python ba.py --bal_file data/fr1desk_small.txt
 ```
 
+<!---
 ## SLAM
 
 ```
-python slam.py --file data/fr1desk.txt
+python slam.py --bal_file data/fr1desk.txt
 ```
+-->

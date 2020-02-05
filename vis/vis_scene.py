@@ -5,14 +5,15 @@ import pyglet
 from utils import lie_algebra
 
 
-def view(cam_params, landmarks, K, fov=[640, 480]):
-	scene = trimesh.Scene()
+def view(cam_params, landmarks, K, fov=(640, 480)):
 
 	focal = [K[0, 0], K[1, 1]]
 	angle_fov = np.array([0., 0.])
 	angle_fov[0] = np.arctan(fov[0] / focal[0])  # in radians
 	angle_fov[1] = np.arctan(fov[1] / focal[1])
 	angle_fov_deg = angle_fov * (180 / np.pi)  # in degrees
+
+	scene = trimesh.Scene()
 
 	for i, params in enumerate(cam_params):
 		Twc = np.linalg.inv(lie_algebra.getT_axisangle(params))
@@ -31,18 +32,15 @@ def view(cam_params, landmarks, K, fov=[640, 480]):
 	scene.camera.resolution = [1200, 900]
 	scene.camera.fov = 60 * (scene.camera.resolution / scene.camera.resolution.max())
 
-	# Create instance of MySceneViewer which contains methods for mouse clicks
-	viewer = trimesh.viewer.SceneViewer(
-		scene=scene,
-		resolution=scene.camera.resolution,
-		start_loop=False,
-	)
+	viewer = trimesh.viewer.SceneViewer(scene=scene,
+										resolution=scene.camera.resolution,
+										start_loop=False)
 
 	pyglet.app.run()
 	return viewer
 
 
-def view_from_graph(graph, fov=[640, 480]):
+def view_from_graph(graph, fov=(640, 480)):
 	cam_params, landmarks = [], []
 	for cam in graph.cam_nodes:
 		cam_params.append(list(cam.mu))
