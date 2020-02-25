@@ -280,10 +280,14 @@ class Factor:
 
         J = self.jac_fn(self.linpoint, *self.args)
         pred_measurement = self.meas_fn(self.linpoint, *self.args)
-
-        meas_model_lambda = np.eye(len(self.measurement)) / self.adaptive_gauss_noise_var
-        lambda_factor = J.T @ meas_model_lambda @ J
-        eta_factor = (J.T @ meas_model_lambda) @ (J @ self.linpoint + self.measurement - pred_measurement)
+        if isinstance(self.measurement, float):
+            meas_model_lambda = 1 / self.adaptive_gauss_noise_var
+            lambda_factor = meas_model_lambda * np.outer(J, J)
+            eta_factor = meas_model_lambda * J.T * (J @ self.linpoint + self.measurement - pred_measurement)
+        else:
+            meas_model_lambda = np.eye(len(self.measurement)) / self.adaptive_gauss_noise_var
+            lambda_factor = J.T @ meas_model_lambda @ J
+            eta_factor = (J.T @ meas_model_lambda) @ (J @ self.linpoint + self.measurement - pred_measurement)
 
         if update_self:
             self.factor.eta, self.factor.lam = eta_factor, lambda_factor

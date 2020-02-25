@@ -23,7 +23,7 @@ class BAFactorGraph(gbp.FactorGraph):
             weaker than the standard deviations of the adjacent factors.
             NB. Jacobian of measurement function effectively sets the scale of the factors.
         """
-        for var_node in self.var_nodes:
+        for var_node in self.cam_nodes + self.lmk_nodes:
             max_factor_lam = 0.
             for factor in var_node.adj_factors:
                 max_factor_lam = max(max_factor_lam, np.max(factor.factor.lam))

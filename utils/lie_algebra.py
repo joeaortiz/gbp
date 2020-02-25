@@ -101,16 +101,3 @@ def se3log(T):
         u = np.dot(Vinv, t)
         x = np.concatenate((u, w))
         return x
-
-
-# ------------------------------  Specific parametrisation ---------------------------------------
-
-def getT_axisangle(x):
-    """
-        Get the transformation matrix from the minimal representation where the angle parameters are in axis angle form.
-    """
-    T = np.zeros([4, 4])
-    T[3, 3] = 1.0
-    T[0:3, 0:3] = so3exp(x[3:6])
-    T[0:3, 3] = x[0:3]
-    return T

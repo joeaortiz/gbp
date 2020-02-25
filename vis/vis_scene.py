@@ -2,7 +2,7 @@ import numpy as np
 import trimesh
 import trimesh.viewer
 import pyglet
-from utils import lie_algebra
+from utils import transformations
 
 
 def view(cam_params, landmarks, K, fov=(640, 480)):
@@ -16,7 +16,7 @@ def view(cam_params, landmarks, K, fov=(640, 480)):
 	scene = trimesh.Scene()
 
 	for i, params in enumerate(cam_params):
-		Twc = np.linalg.inv(lie_algebra.getT_axisangle(params))
+		Twc = np.linalg.inv(transformations.getT_axisangle(params))
 
 		cam_name = f'cam_{i}'
 		cam = trimesh.scene.Camera(fov=angle_fov_deg)

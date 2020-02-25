@@ -1,5 +1,30 @@
 import numpy as np
+from utils import lie_algebra
 
+
+# ----------------------------- get transformation functions -----------------------------
+
+def getT_axisangle(x):
+    """
+        Get the transformation matrix from the minimal representation where the angle parameters are in axis angle form.
+    """
+    T = np.zeros([4, 4])
+    T[3, 3] = 1.0
+    T[0:3, 0:3] = lie_algebra.so3exp(x[3:6])
+    T[0:3, 3] = x[0:3]
+    return T
+
+
+def getT_qt(x):
+    """
+        Get the transformation matrix from the camera position and quaternion parameters.
+    """
+    T = np.zeros([4, 4])
+    T[3, 3] = 1.0
+    q = Quaternion(x[3:])
+    T[0:3, 0:3] = q.rot_matrix()
+    T[0:3, 3] = x[0:3]
+    return T
 
 # ---------------------------------- Quaternions -----------------------------------------------
 

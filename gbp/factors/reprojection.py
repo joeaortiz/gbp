@@ -1,5 +1,5 @@
 import numpy as np
-from utils import lie_algebra
+from utils import transformations, lie_algebra
 
 _EPS = np.finfo(float).eps
 
@@ -16,7 +16,7 @@ def meas_fn(x, K):
         :param x: first 6 params are keyframe pose, latter 3 are landmark location in world frame.
         :param K: camera matrix.
     """
-    Tcw = lie_algebra.getT_axisangle(x[:6])
+    Tcw = transformations.getT_axisangle(x[:6])
     ycf = np.dot(Tcw, np.concatenate((x[6:], [1])))[:3]
     fx, fy = K[0, 0], K[1, 1]
     px, py = K[0, 2], K[1, 2]
@@ -36,7 +36,7 @@ def jac_fn(x, K):
     fx, fy = K[0, 0], K[1, 1]
 
     J = np.zeros([2, 9])
-    Tcw = lie_algebra.getT_axisangle(cam_params)
+    Tcw = transformations.getT_axisangle(cam_params)
     ycf = np.dot(Tcw, np.concatenate((ywf, [1])))[:3]
 
     J_proj = np.array([[fx / ycf[2], 0., -fx * ycf[0] / ycf[2]**2], [0., fy / ycf[2], -fy * ycf[1] / ycf[2]**2]])
@@ -53,7 +53,10 @@ def jac_fn(x, K):
     return J
 
 
-# ---------------------------------- Finite difference Jacobian check -------------------------------------------
+####################################
+# Finite difference Jacobian checks
+####################################
+
 
 def jac_fd(x, K, delta):
     J = np.zeros([2, 9])
@@ -93,3 +96,44 @@ def dRydv_fd(x, K, delta=1e-5):
         vcp[i] += delta
         dRydv_fd[:, i] = (np.dot(lie_algebra.so3exp(vcp), ywf) - np.dot(lie_algebra.so3exp(v), ywf)) / delta
     return dRydv_fd
+
+
+"""
+    Quaternion angle parametrisation is used for angle parameters of pose. 
+    We store the quaternion params for Tcw to transform from world to camera frame. 
+"""
+
+
+def meas_fn_qt(x, K):
+    """
+        Measurement function which projects landmark into image plane of camera.
+        :param x: first 7 params are keyframe pose, latter 3 are landmark location in world frame.
+        :param K: camera matrix.
+    """
+    Tcw = transformations.getT_qt(x[:7])
+    ycf = np.dot(Tcw, np.concatenate((x[7:], [1])))[:3]
+    fx, fy = K[0, 0], K[1, 1]
+    px, py = K[0, 2], K[1, 2]
+    z = 1 / ycf[2] * np.array([fx * ycf[0], fy * ycf[1]]) + np.array([px, py])
+    return z
+
+
+def jac_fn_qt(x, K):
+    """
+        Computes the Jacobian of the function that projects a landmark into the image plane of a camera.
+
+        :param x: first 7 params are keyframe pose, latter 3 are landmark location in world frame.
+        :param K: camera matrix.
+    """
+    cam_params = x[:7]
+    ywf = x[7:]
+    fx, fy = K[0, 0], K[1, 1]
+
+    J = np.zeros([2, 10])
+    Tcw = transformations.getT_axisangle(cam_params)
+    ycf = np.dot(Tcw, np.concatenate((ywf, [1])))[:3]
+
+    # TO DO
+
+
+    return J
