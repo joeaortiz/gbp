@@ -5,7 +5,7 @@ import pyglet
 
 import threading
 
-from utils import lie_algebra
+from utils import transformations
 
 
 class TrimeshSceneViewer(trimesh.viewer.SceneViewer):
@@ -36,7 +36,7 @@ class TrimeshSceneViewer(trimesh.viewer.SceneViewer):
 
         # Update camera poses
         for i, params in enumerate(cam_params):
-            Twc = np.linalg.inv(lie_algebra.getT_axisangle(params))
+            Twc = np.linalg.inv(transformations.getT_axisangle(params))
             cam_name = f'cam_{i}'
             self.scene.graph.update(cam_name, matrix=Twc)
             self._update_vertex_list()
@@ -115,7 +115,7 @@ def create_scene(graph, fov=(640, 480)):
     scene = trimesh.Scene()
 
     for i, params in enumerate(cam_params):
-        Twc = np.linalg.inv(lie_algebra.getT_axisangle(params))
+        Twc = np.linalg.inv(transformations.getT_axisangle(params))
 
         cam_name = f'cam_{i}'
         cam = trimesh.scene.Camera(fov=angle_fov_deg)
