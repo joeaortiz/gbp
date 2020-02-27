@@ -350,7 +350,6 @@ class Factor:
                     lam_factor[mess_start_dim:mess_start_dim + var_dofs, mess_start_dim:mess_start_dim + var_dofs] += self.adj_beliefs[var].lam - self.messages[var].lam
                 mess_start_dim += self.adj_var_nodes[var].dofs
 
-
             # Divide up parameters of distribution
             mess_dofs = self.adj_var_nodes[v].dofs
             eo = eta_factor[start_dim:start_dim + mess_dofs]

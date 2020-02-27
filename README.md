@@ -2,10 +2,6 @@
 
 ## Setup
 
-Install dependencies for gbp library:
-
-- numpy, scipy
-
 Install dependencies for bundle adjustment visualization:
 
 - rtree (`conda install rtree`), shapely (`conda install shapely`), trimesh (`pip install trimesh[easy]`)

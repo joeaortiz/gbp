@@ -1,5 +1,5 @@
 import numpy as np
-from gbp import gbp
+from gbp import gbp, gbp_ba
 from gbp.factors import reprojection
 from utils import read_balfile
 
@@ -19,15 +19,16 @@ class BAFactorGraph(gbp.FactorGraph):
 
     def generate_priors_var(self, weaker_factor=100):
         """
-            Sets automatically the std of the priors such that standard deviations of prior factors are a factor of weaker_factor
+            Sets automatically the std of the priors such that standard deviations
+            of prior factors are a factor of weaker_factor
             weaker than the standard deviations of the adjacent factors.
             NB. Jacobian of measurement function effectively sets the scale of the factors.
         """
         for var_node in self.cam_nodes + self.lmk_nodes:
             max_factor_lam = 0.
             for factor in var_node.adj_factors:
-                max_factor_lam = max(max_factor_lam, np.max(factor.factor.lam))
-
+                if isinstance(factor, gbp_ba.ReprojectionFactor):
+                    max_factor_lam = max(max_factor_lam, np.max(factor.factor.lam))
             lam_prior = np.eye(var_node.dofs) * max_factor_lam / (weaker_factor ** 2)
             var_node.prior.lam = lam_prior
             var_node.prior.eta = lam_prior @ var_node.mu
@@ -101,9 +102,9 @@ def create_ba_graph(bal_file, configs):
             measurements_lIDs, K = read_balfile.read_balfile(bal_file)
 
     graph = BAFactorGraph(eta_damping=configs['eta_damping'],
-                         beta=configs['beta'],
-                         num_undamped_iters=configs['num_undamped_iters'],
-                         min_linear_iters=configs['min_linear_iters'])
+                          beta=configs['beta'],
+                          num_undamped_iters=configs['num_undamped_iters'],
+                          min_linear_iters=configs['min_linear_iters'])
 
     variable_id = 0
     factor_id = 0

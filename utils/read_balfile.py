@@ -13,6 +13,7 @@ def read_balfile(balfile):
         n_keyframes, n_points, n_edges = [int(x) for x in line.split()]
         K = np.zeros([3, 3])
         K[0, 0], K[1, 1], K[0, 2], K[1, 2] = [float(x) for x in f.readline().split()]
+        K[2, 2] = 1.
 
         measurements_camIDs, measurements_lIDs, measurements = [], [], []
         for i in range(n_edges):

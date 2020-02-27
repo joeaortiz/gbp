@@ -12,7 +12,9 @@ def S03_hat_operator(x):
     """
         Hat operator for SO(3) Lie Group
     """
-    return np.array([[0, -x[2], x[1]], [x[2], 0, -x[0]], [-x[1], x[0], 0]])
+    return np.array([[0., -x[2], x[1]],
+                     [x[2], 0., -x[0]],
+                     [-x[1], x[0], 0.]])
 
 
 def SE3_hat_operator(x):
@@ -21,7 +23,10 @@ def SE3_hat_operator(x):
         First 3 elements of the minimal representation x are to do with the translation part while the
         latter 3 elements are to do with the rotation part.
     """
-    return np.array([[0, -x[5], x[4], x[0]], [x[5], 0, -x[3], x[1]], [-x[4], x[3], 0, x[2]], [0, 0, 0, 0]])
+    return np.array([[0., -x[5], x[4], x[0]],
+                     [x[5], 0., -x[3], x[1]],
+                     [-x[4], x[3], 0., x[2]],
+                     [0., 0., 0., 0.]])
 
 
 def so3exp(w):

@@ -2,6 +2,13 @@ import numpy as np
 from utils import lie_algebra
 
 
+def proj(x):
+    if x.ndim == 1:
+        return x[:-1] / x[-1]
+    elif x.ndim == 2:
+        return np.divide(x[:, :-1].T, x[:, -1]).T
+
+
 # ----------------------------- get transformation functions -----------------------------
 
 def getT_axisangle(x):
@@ -27,6 +34,7 @@ def getT_qt(x):
     return T
 
 # ---------------------------------- Quaternions -----------------------------------------------
+
 
 def normalize(v, tolerance=1e-4):
     mag2 = sum(n * n for n in v)
@@ -83,6 +91,7 @@ def q_multiply(q1, q2):
 
 
 # ---------------------------------------- Euler -----------------------------------------------
+
 
 def eulerAnglesToRotationMatrix(theta):
     """
