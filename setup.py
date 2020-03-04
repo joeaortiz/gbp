@@ -20,6 +20,7 @@ setup(
     install_requires=[
         'numpy',
         'scipy',
+        'networkx=2.2'
     ],
     author='Joseph Ortiz',
     author_email='joeaortiz16@gmail.com',
