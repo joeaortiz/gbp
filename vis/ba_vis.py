@@ -8,6 +8,14 @@ import threading
 from utils import transformations
 
 
+def to_opengl_transform(transform=None):
+    if transform is None:
+        transform = np.eye(4)
+    return transform @ trimesh.transformations.rotation_matrix(
+        np.deg2rad(-180), [1, 0, 0]
+    )
+
+
 class TrimeshSceneViewer(trimesh.viewer.SceneViewer):
 
     def __init__(self, scene, resolution=None):
@@ -123,11 +131,16 @@ def create_scene(graph, fov=(640, 480)):
         # geom[1].colors = [(0., 0., 1.)] * 16
         scene.add_geometry(geom[1], transform=Twc, node_name=cam_name)
 
+        if i == 0:
+            # Set initial viewpoint behind this keyframe
+            cam_pose = Twc.copy()
+            cam_pose[:3, 3] -= 2.0 * cam_pose[:3, 2] / np.linalg.norm(cam_pose[:3, 2])
+            scene.camera.transform = to_opengl_transform(transform=cam_pose)
+
     landmarks_pcd = trimesh.PointCloud(landmarks)
     landmarks_pcd.colors = [[0., 0., 0.9]] * len(landmarks)
     scene.add_geometry(landmarks_pcd, node_name='landmarks_pcd')
 
-    scene.set_camera()
     scene.camera.resolution = [1200, 900]
     scene.camera.fov = 60 * (scene.camera.resolution / scene.camera.resolution.max())
 
