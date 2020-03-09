@@ -25,7 +25,7 @@ python ndim_posegraph.py
 ```
 
 ## Bundle Adjustment
-
+The bundle adjustment problem is specified with `--bal_file`. Use `python ba.py -h` for information about optional arguments. 
 ```
 python ba.py --bal_file data/fr1desk_small.txt
 ```
