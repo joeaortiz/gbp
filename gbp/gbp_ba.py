@@ -1,12 +1,12 @@
+"""
+    Defines child classes of GBP parent classes for Bundle Adjustment.
+    Also defines the function to create the factor graph.
+"""
+
 import numpy as np
 from gbp import gbp, gbp_ba
 from gbp.factors import reprojection
 from utils import read_balfile
-
-"""
-    Defines child classes of GBP parent classes for Bundle Adjustment.
-    Also defines the function to create the factor graph. 
-"""
 
 
 class BAFactorGraph(gbp.FactorGraph):

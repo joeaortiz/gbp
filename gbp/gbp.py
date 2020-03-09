@@ -1,12 +1,11 @@
+"""
+    Defines classes for variable nodes, factor nodes and edges and factor graph.
+"""
+
 import numpy as np
 import scipy.linalg
 
 from utils.gaussian import NdimGaussian
-
-"""
-    Defines classes for variable nodes, factor nodes and edges. 
-    Then defines function for single iteration of GBP. 
-"""
 
 
 class FactorGraph:

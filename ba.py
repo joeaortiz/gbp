@@ -24,14 +24,16 @@ parser.add_argument("--Nstds", type=float, default=3.,
 parser.add_argument("--beta", type=float, default=0.01,
                     help="Threshold for the change in the mean of adjacent beliefs for "
                          "relinearisation at a factor.")
-parser.add_argument("--num_undamped_iters", type=int, default=8,
+parser.add_argument("--num_undamped_iters", type=int, default=6,
                     help="Number of undamped iterations at a factor node after relinearisation.")
-parser.add_argument("--min_linear_iters", type=int, default=15,
+parser.add_argument("--min_linear_iters", type=int, default=8,
                     help="Minimum number of iterations between consecutive relinearisations of a factor.")
 parser.add_argument("--eta_damping", type=float, default=0.4,
                     help="Max damping of information vector of messages.")
-parser.add_argument("--prior_std_weaker_factor", type=float, default=10.,
-                    help="Ratio of information at measurement factors / information at prior factors.")
+
+parser.add_argument("--prior_std_weaker_factor", type=float, default=50.,
+                    help="Ratio of std of information matrix at measurement factors / "
+                         "std of information matrix at prior factors.")
 
 parser.add_argument("--float_implementation", action='store_true', default=False,
                     help="Float implementation, so start with strong priors that are weakened")
@@ -64,7 +66,7 @@ if args.float_implementation:
 
 
 graph = gbp_ba.create_ba_graph(args.bal_file, configs)
-print(f'Data: {args.bal_file}\n')
+print(f'\nData: {args.bal_file}\n')
 print(f'Number of keyframes: {len(graph.cam_nodes)}')
 print(f'Number of landmarks: {len(graph.lmk_nodes)}')
 print(f'Number of measurement factors: {len(graph.factors)}\n')
@@ -85,6 +87,7 @@ for i in range(args.n_iters):
         print('Weakening priors')
         graph.weaken_priors(weakening_factor)
 
+    # At the start, allow a larger number of iterations before linearising
     if i == 3 or i == 8:
         for factor in graph.factors:
             factor.iters_since_relin = 1
@@ -101,4 +104,3 @@ for i in range(args.n_iters):
 
     graph.synchronous_iteration(robustify=True, local_relin=True)
 
-vis.vis_scene.view_from_graph(graph)
