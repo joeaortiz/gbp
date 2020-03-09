@@ -29,6 +29,7 @@ parser.add_argument("--n_iters", type=int, default=50,
                     help="Number of iterations of GBP")
 
 args = parser.parse_args()
+print('Configs: \n', args)
 
 
 # Create priors
